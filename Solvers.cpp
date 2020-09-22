@@ -190,16 +190,7 @@ void LU_Solve(vector<vector<double> > &A, vector<double>&b, vector<double>&x) {
 
 void Descomposicion_LU(vector<vector<double> > &A, vector<vector<double> > &L, vector<vector<double> > &U) {
     int n = A.size();
-
-    // Descomentar si se desea preguntar para pivotear
-    //    char answer;
-    //    cout << "MSG: DESEAS PIVOTEAR? responde: y/n" << endl;
-    //    cin >> answer;
-    //    
-    //    if (answer == 'y')
-    cout << "Se Pivoteara de ser necesario. WARNIGN: Las matrices L, U pueden cambiar de orden sus elementos. Sin embargo al utilizar ambas matrices "
-            "para resolver un sistema de ecuaciones las soluciones seran las mismas " << endl;
-
+    
     // inicializar posiciones de U
     for (int i = 0; i < n; i++) {
         U[i][i] = 1;
@@ -207,8 +198,8 @@ void Descomposicion_LU(vector<vector<double> > &A, vector<vector<double> > &L, v
 
     for (int k = 0; k < n; k++) {
         double acc; // variable que contiene la suma
-        //        if (answer == 'y')
-        LU_pivot(A, k);
+        
+        //LU_pivot(A, k);
 
         //l_ik 
         for (int i = k; i < n; i++) {
@@ -735,7 +726,7 @@ void PotenciaInversa(vector < vector < double >> &A, vector <double> &v, double 
     L.assign(n, vector<double>(n, 0.0));
     U.assign(n, vector<double>(n, 0.0));
 
-    //Descomposicion_LU(A, L, U);
+    Descomposicion_LU(A, L, U);
 
     vector <double> v0, Av;
     v0.assign(n, 1.0);
@@ -745,14 +736,9 @@ void PotenciaInversa(vector < vector < double >> &A, vector <double> &v, double 
     for (int it = 0; it < max_it; it++) {
 
         //RESOLVER SISTEMA
-        //Triangular_Inferior(L, v0, v);
-        //Triangular_Superior(U, v, v);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                L[i][j] = A[i][j];
-            }
-        }
-        LU_Solve(L, v0, v);
+        Triangular_Inferior(L, v0, v);
+        Triangular_Superior(U, v, v);
+        
 
         norma(v);
         MatrixVector_Mult(A, v, Av);
