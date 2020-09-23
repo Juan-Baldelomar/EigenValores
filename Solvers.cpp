@@ -190,7 +190,7 @@ void LU_Solve(vector<vector<double> > &A, vector<double>&b, vector<double>&x) {
 
 void Descomposicion_LU(vector<vector<double> > &A, vector<vector<double> > &L, vector<vector<double> > &U) {
     int n = A.size();
-    
+
     // inicializar posiciones de U
     for (int i = 0; i < n; i++) {
         U[i][i] = 1;
@@ -198,7 +198,7 @@ void Descomposicion_LU(vector<vector<double> > &A, vector<vector<double> > &L, v
 
     for (int k = 0; k < n; k++) {
         double acc; // variable que contiene la suma
-        
+
         //LU_pivot(A, k);
 
         //l_ik 
@@ -668,7 +668,7 @@ void metodoPotencia(vector < vector <double>> &A, vector<double> &v, double &lam
 
 void metodoPotenciaDeflacion(vector < vector <double>> &A, vector<vector<double>> &eigenvectors, vector<double> &eigenvalues, double error, int range, int max_it) {
     int n = A.size();
-    double vk;
+    double a_k; // componente del vector propio a eliminar
     double lambda = 0;
     vector<double> v0;
     eigenvalues.assign(range, 0.0);
@@ -680,9 +680,9 @@ void metodoPotenciaDeflacion(vector < vector <double>> &A, vector<vector<double>
 
         // correcion del vector para eliminar componentes de vectores propios ya encontrados
         for (int k = 0; k < e_i; k++) {
-            vk = TransposeVectorMult(eigenvectors[k], v0);
+            a_k = TransposeVectorMult(eigenvectors[k], v0);
             for (int j = 0; j < n; j++) {
-                v0[j] = v0[j] - eigenvectors[k][j] * vk;
+                v0[j] = v0[j] - eigenvectors[k][j] * a_k;
             }
         }
 
@@ -697,9 +697,9 @@ void metodoPotenciaDeflacion(vector < vector <double>> &A, vector<vector<double>
 
             // correcion del vector para eliminar componentes de vectores propios ya encontrados
             for (int k = 0; k < e_i; k++) {
-                vk = TransposeVectorMult(eigenvectors[k], v0);
+                a_k = TransposeVectorMult(eigenvectors[k], v0);
                 for (int j = 0; j < n; j++) {
-                    v0[j] = v0[j] - eigenvectors[k][j] * vk;
+                    v0[j] = v0[j] - eigenvectors[k][j] * a_k;
                 }
             }
 
@@ -722,24 +722,28 @@ void metodoPotenciaDeflacion(vector < vector <double>> &A, vector<vector<double>
 
 void PotenciaInversa(vector < vector < double >> &A, vector <double> &v, double &lambda, double tol, int max_it) {
     int n = A.size();
+
+    //declaracion e inicializacion de variables necesarias
     vector<vector<double>> L, U;
+    vector <double> v0, Av;
     L.assign(n, vector<double>(n, 0.0));
     U.assign(n, vector<double>(n, 0.0));
-
-    Descomposicion_LU(A, L, U);
-
-    vector <double> v0, Av;
     v0.assign(n, 1.0);
     Av.assign(n, 0.0);
+
+    // descomposicion de matriz
+    Descomposicion_LU(A, L, U);
+
+    // norma vector inicial
     norma(v0);
-    
+
     for (int it = 0; it < max_it; it++) {
 
         //RESOLVER SISTEMA
         Triangular_Inferior(L, v0, v);
         Triangular_Superior(U, v, v);
-        
 
+        // calculo de eigenvalor
         norma(v);
         MatrixVector_Mult(A, v, Av);
         lambda = TransposeVectorMult(v, Av);
@@ -758,5 +762,74 @@ void PotenciaInversa(vector < vector < double >> &A, vector <double> &v, double 
 
     cout << "Metodo no pudo converger " << endl;
 
+}
+
+void PotenciaInversaDeflacion(vector < vector <double>> &A, vector<vector<double>> &eigenvectors, vector<double> &eigenvalues, double tol, int range, int max_it) {
+    int n = A.size();
+
+    //declaracion e inicializacion de variables necesarias
+    vector<vector<double>> L, U;
+    vector <double> v0, Av;
+    L.assign(n, vector<double>(n, 0.0));
+    U.assign(n, vector<double>(n, 0.0));
+    v0.assign(n, 1.0);
+    Av.assign(n, 0.0);
+
+    double a_k; //componente del vector propio que se desea eliminar
+    double lambda = 0;
+    eigenvalues.assign(range, 0.0);
+    eigenvectors.assign(range, vector<double>(n, 0.0));
+
+    // Descomposicion Matriz
+    Descomposicion_LU(A, L, U);
+
+    for (int e_i = 0; e_i < range; e_i++) {
+        v0.assign(n, 1);
+
+        // correcion del vector para eliminar componentes de vectores propios ya encontrados
+        for (int k = 0; k < e_i; k++) {
+            a_k = TransposeVectorMult(eigenvectors[k], v0);
+            for (int j = 0; j < n; j++) {
+                v0[j] = v0[j] - eigenvectors[k][j] * a_k;
+            }
+        }
+        
+        // norma vector inicial
+        norma(v0);
+
+        for (int it = 0; it < max_it; it++) {
+            
+            //RESOLVER SISTEMA
+            Triangular_Inferior(L, v0, eigenvectors[e_i]);
+            Triangular_Superior(U, eigenvectors[e_i], eigenvectors[e_i]);
+
+            // calculo de eigenvalor
+            norma(eigenvectors[e_i]);
+            MatrixVector_Mult(A, eigenvectors[e_i], Av);
+            lambda = TransposeVectorMult(eigenvectors[e_i], Av);
+
+            //actualizar iteracion
+            double error = 0;
+            for (int i = 0; i < n; i++) {
+                double dif = Av[i] - lambda * eigenvectors[e_i][i];
+                error += dif*dif;
+                v0[i] = eigenvectors[e_i][i];
+            }// i
+
+            if (sqrt(error) < tol)
+                break;
+            
+                        
+            // correcion del vector para eliminar componentes de vectores propios ya encontrados
+            // la correccion se realiza despues de verificar el error en caso de no ser necesario calculara
+            for (int k = 0; k < e_i; k++) {
+                a_k = TransposeVectorMult(eigenvectors[k], v0);
+                for (int j = 0; j < n; j++) {
+                    v0[j] = v0[j] - eigenvectors[k][j] * a_k;
+                }
+            }
+        }
+        eigenvalues[e_i] = lambda;
+    }
 }
 

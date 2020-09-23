@@ -29,4 +29,5 @@ void Gauss_Seidel(vector<vector <double> > &A, vector < double> &b, vector< doub
 void metodoPotencia(vector < vector <double>> &A, vector<double> &v, double &lambda, double error, int max_it = 1000);
 void metodoPotenciaDeflacion(vector < vector <double>> &A, vector<vector<double>> &eigenvectors, vector<double> &eigenvalues, double error, int range, int max_it=1000);
 void PotenciaInversa(vector < vector < double >> &A, vector <double> &v, double &lambda, double tol, int max_it=1000) ;
+void PotenciaInversaDeflacion(vector < vector <double>> &A, vector<vector<double>> &eigenvectors, vector<double> &eigenvalues, double tol, int range, int max_it);
 #endif

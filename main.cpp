@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include "Tools.hpp"
 #include "Solvers.hpp"
+#include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -22,15 +24,19 @@ using namespace std;
 void ejercicio1(){
     vector<vector<double>> A;
     vector<double> v;
-
-    ReadMatrix(A, "Insumo_Tarea06/Eigen_3x3.txt");
+    
+    string n = "50";
+    string name = "Eigen_" + n + "x" + n + ".txt";
+    string outName = "EigenVector_" + n + "x" + n + ".txt";
+    
+    ReadMatrix(A, "Insumo_Tarea06/"+name);
     v.assign(A.size(), 0.0);
     double lambda;
 
     PotenciaInversa(A, v, lambda, 0.000001, 6000);
 
-    WriteVector(v, "Out/EigenVector_3x3_out.txt");
-    ReadMatrix(A, "Insumo_Tarea06/Eigen_3x3.txt");
+    WriteVector(v, "Out/"+outName);
+    ReadMatrix(A, "Insumo_Tarea06/"+name);
     cout << "Valor propio mas pequeño "<< lambda << endl;
     
     cout << "Vector Propio asociado " <<  v << endl;
@@ -45,9 +51,75 @@ void ejercicio1(){
     Try_Sol(A, b, v);
 }
 
+void ejercicio2(){
+    
+    //variables necesarias
+    vector<vector<double>> A;
+    vector<vector<double>> eigenvectors;
+    vector<double> eigenvalues;
 
-int main(int argc, char** argv) {
-    ejercicio1();
+    //entrada
+    ReadMatrix(A, "Insumo_Tarea06/Eigen_3x3.txt");
+    int nEigen = 3;
+    
+    //procesamiento
+    PotenciaInversaDeflacion(A, eigenvectors, eigenvalues, 0.000001, nEigen, 3000);
+    
+    //salida
+    WriteMatrix(eigenvectors, "Out/N_eigenvectors_3x3_out.txt");
+    WriteVector(eigenvalues, "Out/N_eigenvalues_3x3_out.txt");
+    cout << "los eigenvalores son "<< eigenvalues << endl;
+    cout << "los eigenvectores (almacenados cada uno en una fila) son "<< endl << eigenvectors << endl;
+
+    for (int n = 0; n < nEigen; n++) {
+        ReadMatrix(A, "Insumo_Tarea06/Eigen_3x3.txt");
+        vector<double> b;
+        b.assign(3, 0.0);
+
+        for (int i = 0; i < 3 ; i++)
+            b[i] = eigenvalues[n] * eigenvectors[n][i];
+
+
+        Try_Sol(A, b, eigenvectors[n]);
+    }
+}
+
+
+void ejercicio3(){
+    
+    //variables necesarias
+    vector<vector<double>> A;
+    vector<vector<double>> eigenvectors;
+    vector<double> eigenvalues;
+
+    //entrada
+    ReadMatrix(A, "Insumo_Tarea06/Eigen_50x50.txt");
+    int nEigen = 10;
+    
+    //procesamiento
+    PotenciaInversaDeflacion(A, eigenvectors, eigenvalues, 0.000001, nEigen, 3000);
+    
+    //salida
+    WriteMatrix(eigenvectors, "Out/N_eigenvectors_50x50_out.txt");
+    WriteVector(eigenvalues, "Out/N_eigenvalues_50x50_out.txt");
+    cout << "los eigenvalores son "<< eigenvalues << endl;
+    cout << "los eigenvectores (almacenados cada uno en una fila) son "<< endl << eigenvectors << endl;
+
+    for (int n = 0; n < nEigen; n++) {
+        ReadMatrix(A, "Insumo_Tarea06/Eigen_50x50.txt");
+        vector<double> b;
+        b.assign(50, 0.0);
+
+        for (int i = 0; i < 50 ; i++)
+            b[i] = eigenvalues[n] * eigenvectors[n][i];
+
+
+        Try_Sol(A, b, eigenvectors[n]);
+    }
+}
+
+int main() {
+    ejercicio3();
     return 0;
 }
 
