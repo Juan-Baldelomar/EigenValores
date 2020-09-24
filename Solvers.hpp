@@ -30,4 +30,5 @@ void metodoPotencia(vector < vector <double>> &A, vector<double> &v, double &lam
 void metodoPotenciaDeflacion(vector < vector <double>> &A, vector<vector<double>> &eigenvectors, vector<double> &eigenvalues, double error, int range, int max_it=1000);
 void PotenciaInversa(vector < vector < double >> &A, vector <double> &v, double &lambda, double tol, int max_it=1000) ;
 void PotenciaInversaDeflacion(vector < vector <double>> &A, vector<vector<double>> &eigenvectors, vector<double> &eigenvalues, double tol, int range, int max_it);
+void JacobiEigenValues(vector< vector < double>> &A, vector<double> &eigenvalues, double tol, int max_it=1000);
 #endif

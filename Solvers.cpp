@@ -793,12 +793,12 @@ void PotenciaInversaDeflacion(vector < vector <double>> &A, vector<vector<double
                 v0[j] = v0[j] - eigenvectors[k][j] * a_k;
             }
         }
-        
+
         // norma vector inicial
         norma(v0);
 
         for (int it = 0; it < max_it; it++) {
-            
+
             //RESOLVER SISTEMA
             Triangular_Inferior(L, v0, eigenvectors[e_i]);
             Triangular_Superior(U, eigenvectors[e_i], eigenvectors[e_i]);
@@ -818,8 +818,8 @@ void PotenciaInversaDeflacion(vector < vector <double>> &A, vector<vector<double
 
             if (sqrt(error) < tol)
                 break;
-            
-                        
+
+
             // correcion del vector para eliminar componentes de vectores propios ya encontrados
             // la correccion se realiza despues de verificar el error en caso de no ser necesario calculara
             for (int k = 0; k < e_i; k++) {
@@ -831,5 +831,75 @@ void PotenciaInversaDeflacion(vector < vector <double>> &A, vector<vector<double
         }
         eigenvalues[e_i] = lambda;
     }
+}
+
+void JacobiEigenValues(vector< vector < double>> &A, vector<double> &eigenvalues, double tol, int max_it) {
+    int n = A.size();
+    int i_max = 0, j_max = 0;
+
+    vector<vector<double>> G, A_tmp;
+
+    //inicializar G
+    G.assign(n, vector<double>(n, 0.0));
+    A_tmp.assign(n, vector<double>(n, 0.0));
+
+    for (int i = 0; i < n; i++)
+        G[i][i] = 1;
+
+
+    for (int it = 0; it < max_it; it++) {
+        //find MAX
+        double max = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == j)
+                    continue;
+                if (fabs(A[i][j]) > max) {
+                    i_max = i;
+                    j_max = j;
+                    max = fabs(A[i][j]);
+                }
+            }
+        }
+
+        // criterio de paro
+        if (max < tol) {
+            for (int i = 0; i < n; i++)
+                eigenvalues[i] = A[i][i];
+            return;
+        }
+
+        // calculo de valores para matriz G
+        double delta = (A[j_max][j_max] - A[i_max][i_max]) / (2 * A[i_max][j_max]);
+        double sign = delta < 0 ? -1 : delta > 0 ? 1 : 0;
+        double t = sign / (fabs(delta) + sqrt(1 + delta * delta));
+        double c = 1 / (sqrt(1 + t * t));
+        double s = c*t;
+
+        // calculo de matriz G
+        G[i_max][i_max] = G[j_max][j_max] = c;
+        G[i_max][j_max] = s;
+        G[j_max][i_max] = -s;
+
+        // A*G
+        Matrix_Mult(A, G, A_tmp);
+        
+        // G^T
+        double tmp = G[i_max][j_max];
+        G[i_max][j_max] = G[j_max][i_max];
+        G[j_max][i_max] = tmp;
+
+        // G^T(AG)
+        Matrix_Mult(G, A_tmp, A);
+
+        // Restaurar G
+        G[i_max][i_max] = G[j_max][j_max] = 1;
+        G[i_max][j_max] = G[j_max][i_max] = 0;
+    } //it
+
+    cout << "Metodo no pudo converger " << endl;
+
+
+
 }
 

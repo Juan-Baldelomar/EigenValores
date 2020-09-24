@@ -25,7 +25,7 @@ void ejercicio1(){
     vector<vector<double>> A;
     vector<double> v;
     
-    string n = "50";
+    string n = "3";
     string name = "Eigen_" + n + "x" + n + ".txt";
     string outName = "EigenVector_" + n + "x" + n + ".txt";
     
@@ -118,8 +118,22 @@ void ejercicio3(){
     }
 }
 
+
+void ejercicio4(){
+    vector<vector<double>> A; 
+    ReadMatrix(A, "Insumo_Tarea06/Eigen_50x50.txt");
+    vector<double> eigenvalues;
+    eigenvalues.assign(A.size(), 0.0);
+   
+    JacobiEigenValues(A, eigenvalues, 0.00001, 5000);
+
+    cout << eigenvalues << endl;
+    WriteVector(eigenvalues, "Out/Jacobi_Eigen_50x50.txt");
+}
+
+
 int main() {
-    ejercicio3();
+    ejercicio4();
     return 0;
 }
 
